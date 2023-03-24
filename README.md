@@ -101,8 +101,14 @@ spec:
   pubsubname: notifications-pubsub
 ```
 
-Finally, let's deploy three applications that uses the Dapr StateStore and PubSub components. 
+Finally, let's deploy three applications that uses the Dapr StateStore and PubSub components. This are normal/regular Kubernetes applications, using Deployments and Services. To make these apps dapr-aware we just need to add some Dapr annotations:
 
+
+```
+
+```
+
+Let's deploy the apps with: 
 ```
 kubectl apply -f apps.yaml
 ```
