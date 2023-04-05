@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: java-app-deployment
+  name: read-deployment
   labels:
-    app.kubernetes.io/name: java-app
+    app.kubernetes.io/name: read-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: java-app
+      app.kubernetes.io/name: read-app
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: java-app
+        app.kubernetes.io/name: read-app
       annotations:  
         dapr.io/app-id: read-app
         dapr.io/app-port: "8080"
         dapr.io/enabled: "true"
     spec:
       containers:
-      - name: java-app
-        image: docker.io/salaboy/dapr-java-app
+      - name: read-app
+        image: ko://github.com/salaboy/read-values
         env: 
         - name: STATE_STORE_NAME
           value: statestore
@@ -28,11 +28,11 @@ spec:
         - containerPort: 8080
         livenessProbe:
           httpGet:
-            path: /actuator/health
+            path: /health/readiness
             port: 8080
         readinessProbe:
           httpGet:
-            path: /actuator/health
+            path: /health/liveness
             port: 8080
 
 ---
@@ -40,10 +40,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: java-app-service
+  name: read-app-service
 spec:
   selector:
-    app.kubernetes.io/name: java-app
+    app.kubernetes.io/name: read-app
   ports:
   - name: http
     protocol: TCP
@@ -51,30 +51,29 @@ spec:
     targetPort: 8080
 
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: go-app-deployment
+  name: write-deployment
   labels:
-    app.kubernetes.io/name: go-app
+    app.kubernetes.io/name: write-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: go-app
+      app.kubernetes.io/name: write-app
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: go-app
+        app.kubernetes.io/name: write-app
       annotations:  
         dapr.io/app-id: write-app
         dapr.io/app-port: "8080"
         dapr.io/enabled: "true"
     spec:
       containers:
-      - name: go-app
-        image: docker.io/salaboy/go-app-1c03bcf417fa9388537cc9412c9e168b@sha256:f1e4e616a9af6364871dc02ecf9403e043fe8cbe8253e01a83066ff4d68f44ba
+      - name: write-app
+        image: ko://github.com/salaboy/write-values
         env: 
         - name: STATE_STORE_NAME
           value: statestore
@@ -82,11 +81,11 @@ spec:
         - containerPort: 8080
         livenessProbe:
           httpGet:
-            path: /health/liveness
+            path: /health/readiness
             port: 8080
         readinessProbe:
           httpGet:
-            path: /health/readiness
+            path: /health/liveness
             port: 8080
 
 ---
@@ -94,10 +93,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: go-app-service
+  name: write-app-service
 spec:
   selector:
-    app.kubernetes.io/name: go-app
+    app.kubernetes.io/name: write-app
   ports:
   - name: http
     protocol: TCP
@@ -105,8 +104,6 @@ spec:
     targetPort: 8080
 
 ---
-
-## Subcriber    
 
 apiVersion: apps/v1
 kind: Deployment
@@ -130,7 +127,7 @@ spec:
     spec:
       containers:
       - name: subcriber-app
-        image: docker.io/salaboy/subscriber-4a906ae149426dec3141b6935e4b8e2d
+        image: ko://github.com/salaboy/subscriber
         ports: 
         - containerPort: 8080
         livenessProbe:
