@@ -1,6 +1,11 @@
 # Dapr and Wazero :: Demo step-by-step tutorial - KubeCon EU 2023
 
-On this step by step tutorial we will install Dapr into a Kubernetes Cluster, create two simple application to use Dapr Components and then customize how Dapr works by using the Wazero Runtime to extend Dapr behaviour using Webassembly. 
+On this step-by-step tutorial we will install Dapr into a Kubernetes Cluster, install four application  applications that use Dapr Components to interact with available infrastructure. Once we get things working we will use the Dapr Middleware Compponent that integrates with the Wazero Runtime to customize how the application behaves by extending the infrastructure.
+
+This tutorial is divided into three parts: 
+- [Prerequisites and Installation]()
+- [Installing the Applications and wiring things together]()
+- [Extending Infrastructure with Wazero and WebAssembly]()
 
 ## Pre requisites and installation
 
@@ -101,15 +106,48 @@ spec:
   pubsubname: notifications-pubsub
 ```
 
-Finally, let's deploy three applications that uses the Dapr StateStore and PubSub components. This are normal/regular Kubernetes applications, using Deployments and Services. To make these apps dapr-aware we just need to add some Dapr annotations:
-
-
-```
+Finally, let's deploy three applications that uses the Dapr StateStore and PubSub components. This are normal/regular Kubernetes applications, using Kubernetes `Deployments`. To make these apps Dapr-aware we just need to add some Dapr annotations, for example for the `Read App`:
 
 ```
+annotations:
+  dapr.io/app-id: read-app
+  dapr.io/app-port: "8080"
+  dapr.io/enabled: "true"
+```
 
-Let's deploy the apps with: 
+Let's deploy these apps with: 
 ```
-kubectl apply -f apps.yaml
+kubectl apply -f resources/apps.yaml
 ```
+
+Now you can access the Frontend application by using `kubectl port-forward`:
+
+```
+kubectl port-forward svc/frontend 8080:80
+```
+
+And then pointing your browser to [http://localhost:8080](http://localhost:8080)
+
+
+## Extending Infrastructure with Wazero and WebAssembly
+
+Now that we have our application up and running, let's use Wazero and the [Dapr WASM Middleware Component]() to extend our application infrastructure with a middleware filter.
+
+You can find the [filter source code here](apps/middleware/).
+
+This is a very simple filter that reads the body of the requests and do string replacements on the contents. 
+
+To apply this filter to the `Write App` we need to first compile the filter source code written in Go using `tinyGo` (add link). 
+
+This generates a `.wasm` file that we can run everywhere with any WASM runtime. For this tutorial we will be using the Wazero WebAssembly runtime that is already integrated with Dapr. 
+
+To make this `.wasm` file available in our cluster we will be using Kubernetes `ConfigMaps` which then will be mounted as a volume for the Dapr sidecar to use. 
+
+To configure this new filter we need to define two things: 
+- A Dapr Middleware component
+- A Dapr Configuration
+
+Once we have the Middleware component and the configuration, we only need to update our `Write App` to use this configuration. 
+
+
 
