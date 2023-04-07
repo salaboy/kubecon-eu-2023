@@ -31,18 +31,3 @@ spec:
           httpGet:
             path: /health/readiness
             port: 8080
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: subcriber-service
-spec:
-  selector:
-    app.kubernetes.io/name: subcriber-app
-  ports:
-  - name: http
-    protocol: TCP
-    port: 80
-    targetPort: 8080

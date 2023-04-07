@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -32,6 +33,14 @@ func writeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	value := r.URL.Query().Get("value")
+
+	b, err := io.ReadAll(r.Body)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Println(string(b))
 
 	result, _ := daprClient.GetState(ctx, STATE_STORE_NAME, "values", nil)
 	myValues := MyValues{}

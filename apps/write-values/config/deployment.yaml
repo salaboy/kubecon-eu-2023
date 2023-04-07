@@ -17,10 +17,23 @@ spec:
         dapr.io/app-id: write-app
         dapr.io/app-port: "8080"
         dapr.io/enabled: "true"
+        dapr.io/volume-mounts: "wasm-volume:/mnt/wasm"
+        dapr.io/log-level: "debug"
+        dapr.io/config: "appconfig"
     spec:
+      volumes:
+        - name: wasm-volume
+          configMap:
+            name: wasm-router
+            items:
+              - key: router.wasm
+                path: router.wasm
       containers:
       - name: write-app
-        image: ko://github.com/salaboy/write-values
+        image: ko://github.com/salaboy/kubecon-eu-2023/write-values
+        volumeMounts: 
+          - name: wasm-volume
+            mountPath: /mnt/wasm
         env: 
         - name: STATE_STORE_NAME
           value: statestore
@@ -34,18 +47,3 @@ spec:
           httpGet:
             path: /health/liveness
             port: 8080
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: write-app-service
-spec:
-  selector:
-    app.kubernetes.io/name: write-app
-  ports:
-  - name: http
-    protocol: TCP
-    port: 80
-    targetPort: 8080

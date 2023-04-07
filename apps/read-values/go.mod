@@ -1,4 +1,4 @@
-module github.com/salaboy/read-values
+module github.com/salaboy/kubecon-eu-2023/read-values
 
 go 1.19
 

@@ -1,4 +1,4 @@
-module github.com/salaboy/subscriber
+module github.com/salaboy/kubecon-eu-2023/subscriber
 
 go 1.19
 

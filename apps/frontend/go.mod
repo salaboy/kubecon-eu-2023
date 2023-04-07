@@ -1,4 +1,4 @@
-module github.com/salaboy/kubecon-eu-2023/write-values
+module github.com/salaboy/kubecon-eu-2023/frontend
 
 go 1.19
 

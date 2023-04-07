@@ -1,29 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: read-deployment
+  name: frontend-deployment
   labels:
-    app.kubernetes.io/name: read-app
+    app.kubernetes.io/name: frontend-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: read-app
+      app.kubernetes.io/name: frontend-app
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: read-app
+        app.kubernetes.io/name: frontend-app
       annotations:  
-        dapr.io/app-id: read-app
+        dapr.io/app-id: frontend-app
         dapr.io/app-port: "8080"
         dapr.io/enabled: "true"
     spec:
       containers:
-      - name: read-app
-        image: ko://github.com/salaboy/read-values
-        env: 
-        - name: STATE_STORE_NAME
-          value: statestore
+      - name: frontend-app
+        image: ko://github.com/salaboy/kubecon-eu-2023/frontend
         ports: 
         - containerPort: 8080
         livenessProbe:
