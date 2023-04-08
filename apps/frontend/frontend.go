@@ -13,12 +13,10 @@ import (
 
 func writeHandler(w http.ResponseWriter, r *http.Request) {
 
-	postBody, _ := json.Marshal(map[string]string{
-		"asd": "zxc",
-	})
+	postBody, _ := json.Marshal(map[string]string{})
 	body := bytes.NewBuffer(postBody)
 	//Leverage Go's HTTP Post function to make request
-	resp, err := http.Post("http://localhost:3500/v1.0/invoke/write-app/method/?value=47", "application/json", body)
+	resp, err := http.Post("http://localhost:3500/v1.0/invoke/write-app/method/?message=holamamasita!", "application/json", body)
 	//Handle Error
 	if err != nil {
 		log.Fatalf("An Error Occured %v", err)
@@ -66,6 +64,8 @@ func main() {
 
 	r := mux.NewRouter()
 
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir(os.Getenv("KO_DATA_PATH"))))
+
 	// Dapr subscription routes orders topic to this route
 	r.HandleFunc("/write", writeHandler).Methods("POST")
 	// r.HandleFunc("/read", readHandler).Methods("GET")
@@ -75,7 +75,7 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]bool{"ok": true})
 	})
 
-	log.Printf("Starting Frontend App in Port: %s", appPort)
+	log.Printf("Dapr+Wazero Frontend App Started in port 8080!")
 	// Start the server; this is a blocking call
 	err := http.ListenAndServe(":"+appPort, r)
 	if err != http.ErrServerClosed {

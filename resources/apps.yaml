@@ -21,6 +21,7 @@ spec:
       containers:
       - name: read-app
         image: salaboy/read-values-beba3afa347547600cf2333694feae38
+        imagePullPolicy: Always
         env: 
         - name: STATE_STORE_NAME
           value: statestore
@@ -70,6 +71,7 @@ spec:
       containers:
       - name: write-app
         image: salaboy/write-values-5c7406dd4a3e5fe3dfde887f3959f6e7
+        imagePullPolicy: Always
         volumeMounts: 
           - name: wasm-volume
             mountPath: /mnt/wasm
@@ -89,20 +91,6 @@ spec:
 
 ---
 
-apiVersion: v1
-kind: Service
-metadata:
-  name: write-app-service
-spec:
-  selector:
-    app.kubernetes.io/name: write-app
-  ports:
-  - name: http
-    protocol: TCP
-    port: 80
-    targetPort: 8080
-
----
 
 apiVersion: apps/v1
 kind: Deployment
@@ -127,6 +115,7 @@ spec:
       containers:
       - name: subcriber-app
         image: salaboy/subscriber-4a906ae149426dec3141b6935e4b8e2d
+        imagePullPolicy: Always
         ports: 
         - containerPort: 8080
         livenessProbe:
@@ -163,6 +152,7 @@ spec:
       containers:
       - name: frontend-app
         image: salaboy/frontend-deeb2485154b6af419b6c324ba5571bc
+        imagePullPolicy: Always
         ports: 
         - containerPort: 8080
         livenessProbe:

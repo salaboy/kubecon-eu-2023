@@ -4,8 +4,8 @@ On this step-by-step tutorial we will install Dapr into a Kubernetes Cluster, in
 
 This tutorial is divided into three parts: 
 - [Prerequisites and Installation](#pre-requisites-and-installation)
-- [Installing the Applications and wiring things together]()
-- [Extending Infrastructure with Wazero and WebAssembly]()
+- [Installing the Applications and wiring things together](#installing-the-applications-and-wiring-things-together)
+- [Extending Infrastructure with Wazero and WebAssembly](#extending-infrastructure-with-wazero-and-webassembly)
 
 ## Pre requisites and installation
 
