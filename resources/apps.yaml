@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: read-app
-        image: ko://github.com/salaboy/read-values
+        image: salaboy/read-values-beba3afa347547600cf2333694feae38
         env: 
         - name: STATE_STORE_NAME
           value: statestore
@@ -35,20 +35,6 @@ spec:
             path: /health/liveness
             port: 8080
 
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: read-app-service
-spec:
-  selector:
-    app.kubernetes.io/name: read-app
-  ports:
-  - name: http
-    protocol: TCP
-    port: 80
-    targetPort: 8080
 
 ---
 apiVersion: apps/v1
@@ -70,10 +56,20 @@ spec:
         dapr.io/app-id: write-app
         dapr.io/app-port: "8080"
         dapr.io/enabled: "true"
+        dapr.io/volume-mounts: "wasm-volume:/mnt/wasm"
+        #dapr.io/config: appconfig
+        #dapr.io/log-level: debug
     spec:
+      volumes:
+        - name: wasm-volume
+          configMap:
+            name: wasm-router
+            items:
+              - key: filter.wasm
+                path: filter.wasm
       containers:
       - name: write-app
-        image: ko://github.com/salaboy/write-values
+        image: write-values-5c7406dd4a3e5fe3dfde887f3959f6e7
         env: 
         - name: STATE_STORE_NAME
           value: statestore
@@ -127,7 +123,39 @@ spec:
     spec:
       containers:
       - name: subcriber-app
-        image: ko://github.com/salaboy/subscriber
+        image: salaboy/subscriber-4a906ae149426dec3141b6935e4b8e2d
+        ports: 
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: 8080
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 8080
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-app-deployment
+  labels:
+    app.kubernetes.io/name: frontend-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: frontend-app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: frontend-app
+    spec:
+      containers:
+      - name: frontend-app
+        image: salaboy/frontend-deeb2485154b6af419b6c324ba5571bc
         ports: 
         - containerPort: 8080
         livenessProbe:
@@ -144,12 +172,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: subcriber-service
+  name: frontend-app-service
 spec:
   selector:
-    app.kubernetes.io/name: subcriber-app
+    app.kubernetes.io/name: frontend-app
   ports:
-  - name: http
-    protocol: TCP
-    port: 80
-    targetPort: 8080
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

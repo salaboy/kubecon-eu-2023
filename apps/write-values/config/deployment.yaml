@@ -26,8 +26,8 @@ spec:
           configMap:
             name: wasm-router
             items:
-              - key: router.wasm
-                path: router.wasm
+              - key: filter.wasm
+                path: filter.wasm
       containers:
       - name: write-app
         image: ko://github.com/salaboy/kubecon-eu-2023/write-values

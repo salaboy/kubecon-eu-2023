@@ -1,19 +1,19 @@
 # Dapr Middleware component using WASM
 
-Use TinyGo to compile the router.go program:
+Use TinyGo to compile the `filter.go` program:
 
 ```
-tinygo build -o router.wasm -scheduler=none --no-debug -target=wasi router.go
+tinygo build -o filter.wasm -scheduler=none --no-debug -target=wasi filter.go
 ```
 
 
 Create configMap from binary: 
 
 ```
-kubectl delete cm wasm-router && kubectl create configmap wasm-router --from-file=router.wasm && kubectl delete pod -l=app.kubernetes.io/name=write-app
+kubectl delete cm wasm-filter && kubectl create configmap wasm-filter --from-file=filter.wasm && kubectl delete pod -l=app.kubernetes.io/name=write-app
 ```
 
-You need to delete the write-app pod, so the router.wasm file gets reloaded. 
+You need to delete the write-app pod, so the `filter.wasm` file gets reloaded. 
 
 
 
