@@ -11,12 +11,19 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type MyValues struct {
+	Values []string
+}
+
 func writeHandler(w http.ResponseWriter, r *http.Request) {
 
 	postBody, _ := json.Marshal(map[string]string{})
 	body := bytes.NewBuffer(postBody)
+
+	value := r.URL.Query().Get("message")
+
 	//Leverage Go's HTTP Post function to make request
-	resp, err := http.Post("http://localhost:3500/v1.0/invoke/write-app/method/?message=holamamasita!", "application/json", body)
+	resp, err := http.Post("http://localhost:3500/v1.0/invoke/write-app/method/?message="+value, "application/json", body)
 	//Handle Error
 	if err != nil {
 		log.Fatalf("An Error Occured %v", err)
@@ -38,15 +45,65 @@ func writeHandler(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, resp.StatusCode)
 }
 
-// func readHandler(w http.ResponseWriter, r *http.Request) {
-// 	ctx := context.Background()
-// 	daprClient, err := dapr.NewClient()
-// 	if err != nil {
-// 		panic(err)
-// 	}
+func subscriptionsHandler(w http.ResponseWriter, r *http.Request) {
 
-// 	respondWithJSON(w, http.StatusOK, myValues)
-// }
+	//Leverage Go's HTTP Post function to make request
+	resp, err := http.Get("http://localhost:3500/v1.0/invoke/subscriber-app/method/notifications")
+	//Handle Error
+	if err != nil {
+		log.Fatalf("An Error Occured %v", err)
+	}
+	defer resp.Body.Close()
+
+	log.Println("Result: ")
+	log.Println(resp.StatusCode)
+
+	if resp.StatusCode == http.StatusOK {
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		myValues := []string{}
+		json.Unmarshal(bodyBytes, &myValues)
+
+		respondWithJSON(w, http.StatusOK, myValues)
+
+	} else {
+		respondWithJSON(w, http.StatusOK, "no values yet.")
+	}
+
+}
+
+func readHandler(w http.ResponseWriter, r *http.Request) {
+
+	//Leverage Go's HTTP Post function to make request
+	resp, err := http.Get("http://localhost:3500/v1.0/invoke/read-app/method/")
+	//Handle Error
+	if err != nil {
+		log.Fatalf("An Error Occured %v", err)
+	}
+	defer resp.Body.Close()
+
+	log.Println("Result: ")
+	log.Println(resp.StatusCode)
+
+	if resp.StatusCode == http.StatusOK {
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		myValues := MyValues{}
+		json.Unmarshal(bodyBytes, &myValues)
+
+		respondWithJSON(w, http.StatusOK, myValues.Values)
+
+	} else {
+		respondWithJSON(w, http.StatusOK, "no values yet.")
+	}
+
+}
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, _ := json.Marshal(payload)
@@ -64,21 +121,21 @@ func main() {
 
 	r := mux.NewRouter()
 
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir(os.Getenv("KO_DATA_PATH"))))
-
 	// Dapr subscription routes orders topic to this route
 	r.HandleFunc("/write", writeHandler).Methods("POST")
-	// r.HandleFunc("/read", readHandler).Methods("GET")
+	r.HandleFunc("/read", readHandler).Methods("GET")
+	r.HandleFunc("/subscriptions", subscriptionsHandler).Methods("GET")
 
 	// Add handlers for readiness and liveness endpoints
 	r.HandleFunc("/health/{endpoint:readiness|liveness}", func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]bool{"ok": true})
 	})
 
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir(os.Getenv("KO_DATA_PATH"))))
+	http.Handle("/", r)
+
 	log.Printf("Dapr+Wazero Frontend App Started in port 8080!")
 	// Start the server; this is a blocking call
-	err := http.ListenAndServe(":"+appPort, r)
-	if err != http.ErrServerClosed {
-		log.Panic(err)
-	}
+	log.Fatal(http.ListenAndServe(":"+appPort, nil))
+
 }

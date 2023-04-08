@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <title>Dapr + Knative Functions</title>
+    <title>Dapr + Webassembly, made possible by Wazero!</title>
     <style>
         :root {
             --background-color: #FFFFFF;
@@ -239,32 +239,24 @@
     <script>
 
 
-        function getValue() {
-
-            console.log("generating random value");
-            const color = ["#FFCFD2", "#F1C0E8","#CFBAF0","#A3C4F3", "#90DBF4", "#98F5E1", "#8EECF5", "#98F5E1" , "#FFCFD2", "#F1C0E8" ];
-            document.getElementById("inputText").style.backgroundColor = color[Math.floor(Math.random() * 10)];
-            document.getElementById("inputText").innerHTML = Math.floor(Math.random() * 10000);
-            document.getElementById("storeBtn").disabled = false
-
-        }
+        
 
         function storeValue() {
             console.log("storing value..");
 
-            var valueToStore = document.getElementById("inputText").innerHTML;
+            var valueToStore = document.getElementById("inputText").value;
             console.log("value to store: " + valueToStore);
 
             var xmlHttp = new XMLHttpRequest();
-            xmlHttp.open("POST", "/store?value="+valueToStore, false);
+            xmlHttp.open("POST", "/write?message="+valueToStore, false);
             xmlHttp.onreadystatechange = function () {
                 if (xmlHttp.readyState === 4) {
-                    document.getElementById("storeBtn").disabled = true
+                    
                     getStoredValues();
                     Toastify({
                         text: "The value "+valueToStore+" was stored in the database!",
                         duration: 3000,
-                        destination: "https://salaboy.com",
+                        destination: "https://www.salaboy.com",
                         newWindow: true,
                         close: true,
                         gravity: "top", // `top` or `bottom`
@@ -282,7 +274,6 @@
         }
 
         function init(){
-            document.getElementById("storeBtn").disabled = true;
             getStoredValues();
         }
 
@@ -296,30 +287,30 @@
             return url.indexOf('?') !== -1;
         }
 
-        function getAverage() {
+        function getSubcriptionMessages() {
             console.log("calculating average...")
             var xmlHttp = new XMLHttpRequest();
-            xmlHttp.open("GET", "/avg", false);
+            xmlHttp.open("GET", "/subscriptions", false);
             xmlHttp.onreadystatechange = function () {
                 if (xmlHttp.readyState === 4) {
                     const color = ["#FFCFD2", "#F1C0E8","#CFBAF0","#A3C4F3", "#90DBF4", "#98F5E1", "#8EECF5", "#98F5E1" , "#FFCFD2", "#F1C0E8" ];
                     document.getElementById("averageText").style.backgroundColor = color[Math.floor(Math.random() * 10)];
                     document.getElementById("averageText").innerHTML = xmlHttp.responseText;
                     console.log("average=" + xmlHttp.responseText)
-                    Toastify({
-                        text: "The current average is "+xmlHttp.responseText+".",
-                        duration: 3000,
-                        destination: "https://salaboy.com",
-                        newWindow: true,
-                        close: true,
-                        gravity: "top", // `top` or `bottom`
-                        position: "center", // `left`, `center` or `right`
-                        stopOnFocus: true, // Prevents dismissing of toast on hover
-                        style: {
-                            background: "linear-gradient(to right, #00b09b, #96c93d)",
-                        },
-                        onClick: function(){} // Callback after click
-                    }).showToast();
+                    // Toastify({
+                    //     text: "The current average is "+xmlHttp.responseText+".",
+                    //     duration: 3000,
+                    //     destination: "https://salaboy.com",
+                    //     newWindow: true,
+                    //     close: true,
+                    //     gravity: "top", // `top` or `bottom`
+                    //     position: "center", // `left`, `center` or `right`
+                    //     stopOnFocus: true, // Prevents dismissing of toast on hover
+                    //     style: {
+                    //         background: "linear-gradient(to right, #00b09b, #96c93d)",
+                    //     },
+                    //     onClick: function(){} // Callback after click
+                    // }).showToast();
                 }};
             xmlHttp.send(null);
 
@@ -327,11 +318,11 @@
 
         function getStoredValues() {
             var xmlHttp = new XMLHttpRequest();
-            xmlHttp.open("GET", "/values", false);
+            xmlHttp.open("GET", "/read", false);
             xmlHttp.send(null);
             document.getElementById("storedValuesText").innerHTML = xmlHttp.responseText;
-            document.getElementById("inputText").innerHTML = "Click the button to generate a new value."
-            document.getElementById("storeBtn").disabled = true
+            
+            //document.getElementById("storeBtn").disabled = true
         }
 
         function clearStoredValues() {
@@ -369,15 +360,14 @@
             </div>
             <div class="row main">
                 <div class="column">
-                    <button id="getValueBtn" onclick="getValue()">Generate Value</button>
-
-
-                    <div id="inputText" class="inputField">
-                        Click the button to generate a new value.
-                    </div>
+                    
+                    Write your message here
+                    <input id="inputText" type="text" class="inputField">
+                        
+                </input>
 
                     <div class="last">
-                        <button id="storeBtn" disabled onclick="storeValue()">Store Value</button>
+                        <button id="storeBtn" onclick="storeValue()">Store Message</button>
 
                     </div>
                 </div>
@@ -394,12 +384,12 @@
 
                 <div class="column">
                     <div id="averageDiv">
-                        <button id="avgBtn" onclick="getAverage()" >Calculate Average</button>
+                        <button id="avgBtn" onclick="getSubcriptionMessages()" >Get Messages on Subscriber App</button>
                     </div>
                 </div>
                 <div class="column">
-                    <h3>Calculated Average</h3>
-                    <div id="averageText" class="inputField">Click the button to calculate the average. </div>
+                    <h3>Messages Received in the Subscriber App</h3>
+                    <div id="averageText" class="inputField">Click the button get the messages from the Subscriber app </div>
                 </div>
 
             </div>

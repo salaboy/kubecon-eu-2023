@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/http/httputil"
 	"os"
 
 	"fmt"
@@ -24,13 +23,7 @@ var sub = &common.Subscription{
 	Route:      "/notifications",
 }
 
-func printRoot(w http.ResponseWriter, r *http.Request) {
-	requestDump, err := httputil.DumpRequest(r, true)
-	if err != nil {
-		fmt.Println(err)
-	}
-	log.Println(string(requestDump))
-}
+var notifications []string
 
 func main() {
 	appPort := os.Getenv("APP_PORT")
@@ -51,8 +44,9 @@ func main() {
 		if err != nil {
 			log.Fatal(err.Error())
 		}
-		fmt.Println("Subscriber received on /notifications:", string(result.Data))
-
+		notification := "Received notification: " + string(result.Data)
+		fmt.Println(notification)
+		notifications = append(notifications, notification)
 		obj, err := json.Marshal(data)
 		if err != nil {
 			log.Fatal(err.Error())
@@ -61,7 +55,18 @@ func main() {
 		if err != nil {
 			log.Fatal(err.Error())
 		}
-	})
+	}).Methods("POST")
+
+	r.HandleFunc("/notifications", func(w http.ResponseWriter, r *http.Request) {
+		obj, err := json.Marshal(notifications)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		_, err = w.Write(obj)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+	}).Methods("GET")
 
 	// Add handlers for readiness and liveness endpoints
 	r.HandleFunc("/health/{endpoint:readiness|liveness}", func(w http.ResponseWriter, r *http.Request) {

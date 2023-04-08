@@ -136,23 +136,23 @@ spec:
         dapr.io/app-id: frontend-app
         dapr.io/app-port: "8080"
         dapr.io/enabled: "true"
-        # dapr.io/volume-mounts: "wasm-volume:/mnt/wasm"
-        # dapr.io/config: appconfig
+        dapr.io/volume-mounts: "wasm-volume:/mnt/wasm"
+        dapr.io/config: appconfig
     spec:
-      # volumes:
-      #   - name: wasm-volume
-      #     configMap:
-      #       name: wasm-filter
-      #       items:
-      #         - key: filter.wasm
-      #           path: filter.wasm
+      volumes:
+        - name: wasm-volume
+          configMap:
+            name: wasm-filter
+            items:
+              - key: filter.wasm
+                path: filter.wasm
       containers:
       - name: frontend-app
         image: salaboy/frontend-deeb2485154b6af419b6c324ba5571bc
         imagePullPolicy: Always
-        # volumeMounts: 
-        #   - name: wasm-volume
-        #     mountPath: /mnt/wasm
+        volumeMounts: 
+          - name: wasm-volume
+            mountPath: /mnt/wasm
         ports: 
         - containerPort: 8080
         livenessProbe:

@@ -39,7 +39,7 @@ Let's create a Redis instance that our applications can use to store state or ex
 ```
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update                            
-helm install redis bitnami/redis --set image.tag=6.2 --set architecture=standalonex
+helm install redis bitnami/redis --set image.tag=6.2 --set architecture=standalone
 ```
 You should see something like this: 
 
@@ -211,6 +211,8 @@ kubectl port-forward svc/frontend-app-service 8080:80
 And then pointing your browser to [http://localhost:8080](http://localhost:8080)
 
 ![](imgs/kubecon-eu-05-app-frontend.png)
+
+
 
 ## Extending Infrastructure with Wazero and WebAssembly
 
