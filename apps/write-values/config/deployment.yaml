@@ -24,7 +24,7 @@ spec:
       volumes:
         - name: wasm-volume
           configMap:
-            name: wasm-router
+            name: wasm-filter
             items:
               - key: filter.wasm
                 path: filter.wasm

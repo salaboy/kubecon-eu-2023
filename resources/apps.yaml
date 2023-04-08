@@ -57,19 +57,22 @@ spec:
         dapr.io/app-port: "8080"
         dapr.io/enabled: "true"
         dapr.io/volume-mounts: "wasm-volume:/mnt/wasm"
-        #dapr.io/config: appconfig
-        #dapr.io/log-level: debug
+        dapr.io/config: appconfig
+        dapr.io/log-level: debug
     spec:
       volumes:
         - name: wasm-volume
           configMap:
-            name: wasm-router
+            name: wasm-filter
             items:
               - key: filter.wasm
                 path: filter.wasm
       containers:
       - name: write-app
-        image: write-values-5c7406dd4a3e5fe3dfde887f3959f6e7
+        image: salaboy/write-values-5c7406dd4a3e5fe3dfde887f3959f6e7
+        volumeMounts: 
+          - name: wasm-volume
+            mountPath: /mnt/wasm
         env: 
         - name: STATE_STORE_NAME
           value: statestore
@@ -152,6 +155,10 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: frontend-app
+      annotations:  
+        dapr.io/app-id: frontend-app
+        dapr.io/app-port: "8080"
+        dapr.io/enabled: "true"
     spec:
       containers:
       - name: frontend-app

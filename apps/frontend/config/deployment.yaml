@@ -13,6 +13,10 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: frontend-app
+      annotations:  
+        dapr.io/app-id: frontend-app
+        dapr.io/app-port: "8080"
+        dapr.io/enabled: "true"  
     spec:
       containers:
       - name: frontend-app
