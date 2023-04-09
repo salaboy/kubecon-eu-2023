@@ -220,9 +220,9 @@ Now that we have our application up and running, let's use Wazero and the [Dapr 
 
 You can find the [filter source code here](apps/middleware/).
 
-This is a very simple filter that reads the body of the requests and do string replacements on the contents. 
+This is a very simple filter gives our messages super powers! By using the [`github.com/enescakir/emoji`](https://github.com/enescakir/emoji) library, it parses and replace emoji 'tags'. 
 
-To apply this filter to the `Write App` we need to first compile the filter source code written in Go using `tinyGo` (add link). 
+To apply this filter to the `Frontend App` we need to first compile the filter source code written in Go using `tinyGo` (add link). 
 
 This generates a `.wasm` file that we can run everywhere with any WASM runtime. For this tutorial we will be using the Wazero WebAssembly runtime that is already integrated with Dapr. 
 
@@ -267,11 +267,13 @@ You can do this by uncommenting the following lines inside the [`resources/apps.
       #           path: filter.wasm
 ```
 
-Uncomment the lines and reapply the apps.yaml file running after you save the changes: 
+Uncomment the lines and reapply the `apps.yaml` file running after you save the changes, or just apply the modified `apps-wasm.yaml` file: 
 
 ```
-kubectl apply -f resources/apps.yaml
+kubectl apply -f resources/apps-wasm.yaml
 ```
+
+Go back to the application front end and use your favourite emojis! :metal:
 
 
 
