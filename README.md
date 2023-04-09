@@ -2,6 +2,8 @@
 
 On this step-by-step tutorial we will install Dapr into a Kubernetes Cluster, install four application  applications that use Dapr Components to interact with available infrastructure. Once we get things working we will use the Dapr Middleware Compponent that integrates with the Wazero Runtime to customize how the application behaves by extending the infrastructure.
 
+![](imgs/dapr-wazero.png)
+
 This tutorial is divided into three parts: 
 - [Prerequisites and Installation](#pre-requisites-and-installation)
 - [Installing the Applications and wiring things together](#installing-the-applications-and-wiring-things-together)
