@@ -188,6 +188,8 @@ kubectl apply -f resources/apps.yaml
 ```
 Notice that Dapr will create a Kubernetes Service for each Dapr enabled application (the ones containing the Dapr annotations). 
 
+![](imgs/kubecon-eu-03b-apps-with-dapr-demo.png)
+
 Check that all the pods are up and running: 
 
 ```
@@ -273,8 +275,9 @@ Uncomment the lines and reapply the `apps.yaml` file running after you save the 
 kubectl apply -f resources/apps-wasm.yaml
 ```
 
-Go back to the application front end and use your favourite emojis! :metal:
+![](imgs/kubecon-eu-04-apps-with-dapr-wazero.png)
 
+Go back to the application front end and use your favourite emojis! :metal:
 
 
 # Sum up
