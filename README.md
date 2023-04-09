@@ -283,7 +283,6 @@ kubectl apply -f resources/apps-wasm.yaml
 
 Go back to the application front end and use your favourite emojis! :metal:
 
-
 # Sum up
 
 
