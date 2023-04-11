@@ -2,7 +2,7 @@
 
 [Safe, Dynamic Middleware with Dapr and WebAssembly](https://sched.co/1HyW0)
 
-On this step-by-step tutorial we will install Dapr into a Kubernetes Cluster, install four application  applications that use Dapr Components to interact with available infrastructure. Once we get things working we will use the Dapr Middleware Compponent that integrates with the Wazero Runtime to customize how the application behaves by extending the infrastructure.
+On this step-by-step tutorial we will install Dapr into a Kubernetes Cluster, install four application  applications that use Dapr Components to interact with existing infrastructure. Once we get things working we will use the Dapr Middleware Compponent that integrates with the Wazero Runtime to customize how the application behaves by extending the infrastructure.
 
 ![](imgs/dapr-wazero.png)
 
@@ -94,7 +94,7 @@ For more information on running Dapr, visit:
 https://dapr.io
 ```
 
-Let's now install our applications. 
+Let's now install the applications. 
 
 ## Installing the Applications and wiring things together
 
@@ -218,41 +218,78 @@ And then pointing your browser to [http://localhost:8080](http://localhost:8080)
 
 ![](imgs/kubecon-eu-05-app-frontend.png)
 
-
-
 ## Extending Infrastructure with Wazero and WebAssembly
 
-Now that we have our application up and running, let's use Wazero and the [Dapr WASM Middleware Component]() to extend our application infrastructure with a middleware filter.
+Now that we have our application up and running, let's use Wazero and the [Dapr WASM Middleware Component](https://docs.dapr.io/reference/components-reference/supported-middleware/middleware-wasm/) to extend our application infrastructure with a middleware filter.
+
+This filter can intercept requests and can modify them to enforce policy or add Headers that other applications or tools can understand. This is a very simple filter gives our messages super powers! By using the [`github.com/enescakir/emoji`](https://github.com/enescakir/emoji) library, it parses and replace emoji 'tags'. 
+
+```
+package main
+
+import (
+	"net/url"
+	"strings"
+
+	"github.com/enescakir/emoji"
+	"github.com/http-wasm/http-wasm-guest-tinygo/handler"
+	"github.com/http-wasm/http-wasm-guest-tinygo/handler/api"
+)
+
+func main() {
+	handler.HandleRequestFn = handleRequest
+}
+
+// handleRequest implements a simple HTTP router.
+func handleRequest(req api.Request, resp api.Response) (next bool, reqCtx uint32) {
+	if uri := req.GetURI(); !strings.HasPrefix(uri, "/dapr/") {
+		u, err := url.ParseRequestURI(req.GetURI())
+		if err != nil {
+			panic(err)
+		}
+		q := u.Query()
+		q.Set("message", emoji.Parse(q.Get("message")))
+		u.RawQuery = q.Encode()
+		req.SetURI(u.String())
+	}
+
+	next = true // proceed to the next handler on the host.
+	return
+
+}
+
+```
 
 You can find the [filter source code here](apps/middleware/).
 
-This is a very simple filter gives our messages super powers! By using the [`github.com/enescakir/emoji`](https://github.com/enescakir/emoji) library, it parses and replace emoji 'tags'. 
+To apply this filter to the `Frontend App` we need to first compile the filter source code written in Go using [tinyGo](https://tinygo.org/) into WASM. 
 
-To apply this filter to the `Frontend App` we need to first compile the filter source code written in Go using `tinyGo` (add link). 
+```
+tinygo build -o filter.wasm -scheduler=none --no-debug -target=wasi filter.go
+```
 
-This generates a `.wasm` file that we can run everywhere with any WASM runtime. For this tutorial we will be using the Wazero WebAssembly runtime that is already integrated with Dapr. 
+This generates a `.wasm` file that we can run everywhere with any WASM runtime. For this tutorial we will be using the [Wazero](https://wazero.io/) WebAssembly runtime that is already integrated in Dapr.
+
 
 To make this `.wasm` file available in our cluster we will be using Kubernetes `ConfigMaps` which then will be mounted as a volume for the Dapr sidecar to use. 
 
+From the middleware directory run: 
+```
+kubectl create configmap wasm-filter --from-file=filter.wasm
+```
+
 To configure this new filter we need to define two things: 
 - A Dapr Middleware component [`resources/middleware.yaml`](resources/middleware.yaml)
-- A Dapr Configuration []`resources/configuration.yaml`](resources/configuration.yaml)
+- A Dapr Configuration [`resources/configuration.yaml`](resources/configuration.yaml)
 
 Let's apply these two resources running: 
+
 ```
 kubectl apply -f resources/middleware.yaml
 kubectl apply -f resources/configuration.yaml
 ```
 
-Once we have the Middleware component and the configuration, we only need to update our `Write App` to use this configuration and make sure that the `filter.wasm` can be accessed by the Dapr sidecar. 
-
-To do this we can create a Kubernetes ConfigMap containing the `filter.wasm` file:
-
-```
-kubectl create configmap wasm-filter --from-file=apps/middleware/filter.wasm
-```
-
-As a final step, let's link everything together. We need to mount the ConfigMap content into our `Write App` that is going to use the filter and we need to also tell Dapr to mount that volume so it can load the `filter.wasm` file.
+Once we have the Dapr Middleware component and the configuration, we only need to update our `Frontend App` to use this configuration and make sure that the `filter.wasm` can be accessed by the Dapr sidecar. 
 
 You can do this by uncommenting the following lines inside the [`resources/apps.yaml`](resources/apps.yaml) file: 
 
@@ -285,5 +322,21 @@ Go back to the application front end and use your favourite emojis! :metal:
 
 # Sum up
 
+While this example is a bit silly, it demonstrates how you can create extension points for your existing applications by using WebAssembly and Wazero. These extension points can be used by Platform Teams to custommize the default behavior of existing tools. 
 
+By using Dapr, applications can stay agnostic of all the infrastructure concerns, which give Platform teams the option to swap infrastructure and fine tune configurations based on the the application's requirements. 
+
+Here are some links that you might find interesting about other initiatives that we are looking into: 
+
+- [Getting Started with WASM and Dapr Sample](https://github.com/dapr/samples/tree/master/hello-wasm)
+- [Fetching WASM files from OCI registries (issue)](https://github.com/dapr/components-contrib/issues/2700)
+- [Dapr Ambient](https://github.com/dapr-sandbox/dapr-ambient)
+- [Provisioning and Consuming Multi-Cloud Infrastructure with Crossplane and Dapr](https://blog.crossplane.io/crossplane-and-dapr/)
+- [runwasi to run webassembly right besides your containers](https://github.com/containerd/runwasi )
+
+Feel free to DM get in touch if you have questions or comments:
+- [Adrian Cole on Twitter](https://twitter.com/adrianfcole)
+- [Salaboy on Twitter](https://twitter.com/salaboy)
+  - [Salaboy.com](https://www.salaboy.com)
+  - [Platform Engineering on Kubernetes](http://mng.bz/jjKP?ref=salaboy.com)
 
