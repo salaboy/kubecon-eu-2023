@@ -24,8 +24,6 @@ func handleRequest(req api.Request, resp api.Response) (next bool, reqCtx uint32
 		q.Set("message", emoji.Parse(q.Get("message")))
 		u.RawQuery = q.Encode()
 		req.SetURI(u.String())
-		next = true // proceed to the next handler on the host.
-		return
 	}
 
 	next = true // proceed to the next handler on the host.

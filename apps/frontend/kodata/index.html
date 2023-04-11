@@ -12,7 +12,7 @@
             --background-color: #FFFFFF;
             --secondary-background-color: #d3d5d9;
             --text-color: #212326;
-            --main-color: #e33232;
+            --main-color: #2B3585;
         }
         * {
             box-sizing: border-box;
@@ -55,12 +55,14 @@
             display: flex;
             justify-content: space-between;
             padding: 40px 40px 0;
+            text-align: center;
         }
         .layout .header .info {
             color: var(--background-color);
         }
-        .layout .header .info h1 {
-            font-size: 25px;
+        .layout h1 {
+            font-size: 40px;
+            color: var(--background-color);
         }
         .layout .header .info h2 {
             font-size: 18px;
@@ -71,7 +73,7 @@
             font-weight: normal;
         }
         .layout .header img{
-            height: 20vh;
+            
         }
         h1, h2 {
             font-weight: bold;
@@ -165,6 +167,7 @@
             border-radius: 10px;
             background-color: var(--background-color);
             height: 100%;
+            font-size: 30px;
             max-height: 25vh;
 
         }
@@ -297,20 +300,7 @@
                     document.getElementById("averageText").style.backgroundColor = color[Math.floor(Math.random() * 10)];
                     document.getElementById("averageText").innerHTML = xmlHttp.responseText;
                     console.log("average=" + xmlHttp.responseText)
-                    // Toastify({
-                    //     text: "The current average is "+xmlHttp.responseText+".",
-                    //     duration: 3000,
-                    //     destination: "https://salaboy.com",
-                    //     newWindow: true,
-                    //     close: true,
-                    //     gravity: "top", // `top` or `bottom`
-                    //     position: "center", // `left`, `center` or `right`
-                    //     stopOnFocus: true, // Prevents dismissing of toast on hover
-                    //     style: {
-                    //         background: "linear-gradient(to right, #00b09b, #96c93d)",
-                    //     },
-                    //     onClick: function(){} // Callback after click
-                    // }).showToast();
+               
                 }};
             xmlHttp.send(null);
 
@@ -338,20 +328,23 @@
 </head>
 <body onload="init();">
 <div class="background">
-    <img src="background.jpg" alt="background">
+    
 </div>
 <div class="layout">
     <div class="header">
         <div class="logo">
-            <img src="dapr-logo.svg" alt="Dapr">
+            <img src="dapr-logo.png" width="216" height="98"  alt="Dapr">
         </div>
         <div class="info">
-            <h1>Dapr + Knative Functions V1.0</h1>
-            <img src="heart.png" alt="love">
+           
+            <img src="dapr-wazero.png" height="250" alt="love">
         </div>
         <div class="qr">
-            <img src="knative-logo.png" alt="Knative">
+            <img src="wazero.png" width="216" height="98" alt="Wazero">
         </div>
+    </div>
+    <div>
+        <h1>Dapr + WebAssembly + Wazero</h1>
     </div>
     <div class="content">
         <div class="container">
@@ -361,10 +354,9 @@
             <div class="row main">
                 <div class="column">
                     
-                    Write your message here
-                    <input id="inputText" type="text" class="inputField">
-                        
-                </input>
+                    
+                    <h3>Write your message here</h3>
+                    <input id="inputText" type="text" class="inputField" value=":metal: , :tada: , 'hello'"></input>
 
                     <div class="last">
                         <button id="storeBtn" onclick="storeValue()">Store Message</button>
@@ -375,19 +367,14 @@
                 <div class="column">
                     <h3>Values in the Database</h3>
                     <div id="storedValuesText" class="inputField textArea">
-
+                        :metal: , :tada: , "hello"
                     </div>
 
                 </div>
             </div>
             <div class="row new-version">
-
                 <div class="column">
-                    <div id="averageDiv">
-                        <button id="avgBtn" onclick="getSubcriptionMessages()" >Get Messages on Subscriber App</button>
-                    </div>
-                </div>
-                <div class="column">
+                    <button id="avgBtn" onclick="getSubcriptionMessages()" >Get Messages on Subscriber App</button>
                     <h3>Messages Received in the Subscriber App</h3>
                     <div id="averageText" class="inputField">Click the button get the messages from the Subscriber app </div>
                 </div>
