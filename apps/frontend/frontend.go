@@ -15,6 +15,26 @@ type MyValues struct {
 	Values []string
 }
 
+func deleteHandler(w http.ResponseWriter, r *http.Request) {
+
+	req, err := http.NewRequest("DELETE", "http://localhost:3500/v1.0/invoke/write-app/method/", nil)
+	//Handle Error
+	if err != nil {
+		log.Fatalf("An Error Occured %v", err)
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	defer resp.Body.Close()
+
+	log.Println("Result: ")
+	log.Println(resp.StatusCode)
+
+	respondWithJSON(w, http.StatusOK, resp.StatusCode)
+}
 func writeHandler(w http.ResponseWriter, r *http.Request) {
 
 	postBody, _ := json.Marshal(map[string]string{})
@@ -122,7 +142,9 @@ func main() {
 	r := mux.NewRouter()
 
 	// Dapr subscription routes orders topic to this route
+
 	r.HandleFunc("/write", writeHandler).Methods("POST")
+	r.HandleFunc("/delete", deleteHandler).Methods("POST")
 	r.HandleFunc("/read", readHandler).Methods("GET")
 	r.HandleFunc("/subscriptions", subscriptionsHandler).Methods("GET")
 

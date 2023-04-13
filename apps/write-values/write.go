@@ -24,6 +24,18 @@ type MyValues struct {
 	Values []string
 }
 
+func deleteHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+	daprClient, err := dapr.NewClient()
+	if err != nil {
+		panic(err)
+	}
+	if err := daprClient.DeleteState(ctx, STATE_STORE_NAME, "values", nil); err != nil {
+		panic(err)
+	}
+
+}
+
 func writeHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	daprClient, err := dapr.NewClient()
@@ -77,6 +89,8 @@ func main() {
 
 	// Dapr subscription routes orders topic to this route
 	r.HandleFunc("/", writeHandler).Methods("POST")
+
+	r.HandleFunc("/", deleteHandler).Methods("DELETE")
 
 	// Add handlers for readiness and liveness endpoints
 	r.HandleFunc("/health/{endpoint:readiness|liveness}", func(w http.ResponseWriter, r *http.Request) {
