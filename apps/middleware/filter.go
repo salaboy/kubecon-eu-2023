@@ -21,7 +21,14 @@ func handleRequest(req api.Request, resp api.Response) (next bool, reqCtx uint32
 			panic(err)
 		}
 		q := u.Query()
-		q.Set("message", emoji.Parse(q.Get("message")))
+		// Our platform doesn't support cats yet.
+		if strings.Contains(q.Get("message"), "_cat") ||
+			strings.Contains(q.Get("message"), ":cat:") ||
+			strings.Contains(q.Get("message"), ":cat2:") {
+			q.Set("message", strings.ReplaceAll(q.Get("message"), "cat", "***"))
+		} else {
+			q.Set("message", emoji.Parse(q.Get("message")))
+		}
 		u.RawQuery = q.Encode()
 		req.SetURI(u.String())
 	}

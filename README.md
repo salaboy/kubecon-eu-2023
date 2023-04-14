@@ -316,9 +316,10 @@ Uncomment the lines and reapply the `apps.yaml` file running after you save the 
 kubectl apply -f resources/apps-wasm.yaml
 ```
 
-![](imgs/kubecon-eu-04-apps-with-dapr-wazero.png)
-
 Go back to the application front end and use your favourite emojis! :metal:
+
+![](imgs/kubecon-eu-06-app-with-emojis.png)
+
 
 # Sum up
 
